@@ -587,7 +587,7 @@ int main(int argc, char* argv[])
 					throw IOError("Unable to override stdout via dup2()", errno);
 
 				if (execlp("xdelta3",
-						"xdelta3", "-v", "-9", "-S", "djw",
+						   "xdelta3", "-v", "-9", "-S", "djw", "-I", "0", "-B" "2000000000",
 						"-s", source_temp.name(), target_temp.name(),
 						static_cast<const char*>(0)) == -1)
 					throw IOError("execlp() failed", errno);
