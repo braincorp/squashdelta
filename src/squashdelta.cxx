@@ -56,7 +56,23 @@ struct sqdelta_header
 };
 #pragma pack(pop)
 
-#define htonl(val) val
+#ifndef htonll
+uint64_t htonll(uint64_t hostlonglong)
+{
+	// Check system endianness
+	static const int one = 1;
+	if (*(const char *)&one == 1)
+	{ // Little endian
+		// Perform byte swap
+		return ((uint64_t)htonl((uint32_t)(hostlonglong & 0xFFFFFFFF)) << 32) | htonl((uint32_t)(hostlonglong >> 32));
+	}
+	else
+	{
+		// Big endian - no need to swap bytes
+		return hostlonglong;
+	}
+}
+#endif
 
 const uint32_t sqdelta_magic = 0x5371ceb4;
 
@@ -359,7 +375,7 @@ void write_block_list(SparseFileWriter &outf, sqdelta_header h,
 	{
 		struct serialized_compressed_block b;
 
-		b.offset = htonl((*i).offset);
+		b.offset = htonll((*i).offset);
 		b.length = htonl((*i).length);
 		b.uncompressed_length = htonl((*i).uncompressed_length);
 
