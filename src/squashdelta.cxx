@@ -169,7 +169,7 @@ std::list<struct compressed_block> get_blocks(MMAPFile &f, Compressor *&c,
 				block_list = in.as_lreg.block_list();
 			}
 
-			for (uint32_t j = 0; j < block_count; ++j)
+			for (uint64_t j = 0; j < block_count; ++j)
 			{
 				if (block_list[j] & squashfs::block_size::uncompressed)
 				{
