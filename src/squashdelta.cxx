@@ -33,9 +33,9 @@ extern "C"
 
 struct compressed_block
 {
-	size_t offset;
-	size_t length;
-	size_t uncompressed_length;
+	uint64_t offset;
+	uint32_t length;
+	uint32_t uncompressed_length;
 	uint32_t hash;
 };
 
