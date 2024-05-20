@@ -181,7 +181,7 @@ namespace squashfs
 			//le32 block_list[0];
 			le32* block_list();
 
-			uint32_t block_count(uint32_t block_size, uint16_t block_log);
+			uint64_t block_count(uint32_t block_size, uint16_t block_log);
 			size_t inode_size(uint32_t block_size, uint16_t block_log);
 		};
 
@@ -198,7 +198,7 @@ namespace squashfs
 			//le32 block_list[0];
 			le32* block_list();
 
-			uint32_t block_count(uint32_t block_size, uint16_t block_log);
+			uint64_t block_count(uint32_t block_size, uint16_t block_log);
 			size_t inode_size(uint32_t block_size, uint16_t block_log);
 		};
 
