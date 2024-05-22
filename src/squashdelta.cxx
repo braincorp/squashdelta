@@ -31,6 +31,9 @@ extern "C"
 #include "squashfs.hxx"
 #include "util.hxx"
 
+/**
+ * In-memory representation of a compressed block.
+ */
 struct compressed_block
 {
 	size_t offset;
@@ -40,6 +43,11 @@ struct compressed_block
 };
 
 #pragma pack(push, 1)
+/**
+ * On-disk representation of a compressed block.
+ *
+ * Integers are stored in network byte order (big-endian).
+ */
 struct serialized_compressed_block
 {
 	uint64_t offset;
@@ -47,6 +55,9 @@ struct serialized_compressed_block
 	uint32_t uncompressed_length;
 };
 
+/**
+ * On-disk representation of a squashdelta file header.
+ */
 struct sqdelta_header
 {
 	uint32_t magic;
@@ -56,6 +67,15 @@ struct sqdelta_header
 };
 #pragma pack(pop)
 
+/**
+ * @brief Convert a 64-bit integer from host to network byte order.
+ *
+ * This function converts a 64-bit integer from host byte order to network byte order.
+ * It performs a byte swap if the system is little-endian.
+ *
+ * @param hostlonglong The 64-bit integer in host byte order.
+ * @return The 64-bit integer in network byte order.
+ */
 #ifndef htonll
 uint64_t htonll(uint64_t hostlonglong)
 {
@@ -90,9 +110,25 @@ bool sort_by_len_hash(const struct compressed_block &lhs,
 	return lhs.length < rhs.length;
 }
 
-std::list<struct compressed_block> get_blocks(MMAPFile &f, Compressor *&c,
-											  size_t &block_size)
+/**
+ * @brief This function retrieves the list of compressed blocks from a SquashFS filesystem.
+ *
+ * The function takes a reference to an MMAPFile object and a reference to a pointer to a Compressor object.
+ * The MMAPFile object represents the SquashFS filesystem from which the blocks are to be retrieved.
+ * The Compressor object is used to decompress the blocks.
+ *
+ * The function reads the superblock of the SquashFS filesystem, checks its validity, and retrieves the block size.
+ * It then reads the inodes and fragments, and records the compressed blocks.
+ * The function also sorts the blocks by offset to optimize for sequential reads.
+ *
+ * @param f A reference to an MMAPFile object representing the SquashFS filesystem.
+ * @param c A reference to a pointer to a Compressor object used for decompression.
+ * @param block_size A reference to a size_t variable where the block size is stored.
+ * @return A list of compressed_block structs representing the compressed blocks in the SquashFS filesystem.
+ */
+std::list<struct compressed_block> get_blocks(MMAPFile &f, Compressor *&c, size_t &block_size)
 {
+	// read & verify superblock
 	const squashfs::super_block &sb = f.read<squashfs::super_block>();
 
 	if (sb.s_magic != squashfs::magic)
@@ -138,6 +174,7 @@ std::list<struct compressed_block> get_blocks(MMAPFile &f, Compressor *&c,
 				 : 0);
 	coptsr.block_num();
 
+	// read inodes
 	std::list<struct compressed_block>
 		compressed_metadata_blocks,
 		compressed_data_blocks;
