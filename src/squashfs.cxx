@@ -43,10 +43,10 @@ le32* squashfs::inode::reg::block_list()
 	return static_cast<le32*>(voidp);
 }
 
-uint64_t squashfs::inode::reg::block_count(uint32_t block_size,
+uint32_t squashfs::inode::reg::block_count(uint32_t block_size,
 		uint16_t block_log)
 {
-	uint64_t blocks = file_size;
+	uint32_t blocks = file_size;
 
 	// if fragments were not used, round up the last block
 	if (fragment == squashfs::invalid_frag)
@@ -61,7 +61,7 @@ uint64_t squashfs::inode::reg::block_count(uint32_t block_size,
 size_t squashfs::inode::reg::inode_size(uint32_t block_size,
 		uint16_t block_log)
 {
-	uint64_t blocks = block_count(block_size, block_log);
+	uint32_t blocks = block_count(block_size, block_log);
 
 	return sizeof(*this) + blocks * sizeof(le32);
 }
