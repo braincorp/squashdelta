@@ -33,6 +33,7 @@ extern "C"
 
 struct compressed_block
 {
+	// Host endianness
 	uint64_t offset;
 	uint32_t length;
 	uint32_t uncompressed_length;
@@ -42,6 +43,7 @@ struct compressed_block
 #pragma pack(push, 1)
 struct serialized_compressed_block
 {
+	// Shall be big-endian
 	uint64_t offset;
 	uint32_t length;
 	uint32_t uncompressed_length;
