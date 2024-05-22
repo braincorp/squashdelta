@@ -96,7 +96,7 @@ uint64_t squashfs::inode::lreg::block_count(uint32_t block_size,
 size_t squashfs::inode::lreg::inode_size(uint32_t block_size,
 		uint16_t block_log)
 {
-	uint32_t blocks = block_count(block_size, block_log);
+	uint64_t blocks = block_count(block_size, block_log);
 
 	return sizeof(*this) + blocks * sizeof(le32);
 }
