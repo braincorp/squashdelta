@@ -41,6 +41,16 @@ inline uint32_t le_to_host(uint32_t n) { return le32toh(n); }
 template <>
 inline uint64_t le_to_host(uint64_t n) { return le64toh(n); }
 
+// converters from host to LE
+template <class T>
+inline T host_to_le(T n);
+template <>
+inline uint16_t host_to_le(uint16_t n) { return htole16(n); }
+template <>
+inline uint32_t host_to_le(uint32_t n) { return htole32(n); }
+template <>
+inline uint64_t host_to_le(uint64_t n) { return htole64(n); }
+
 // magic auto-conversion types
 template <class T>
 class LittleEndian
@@ -51,6 +61,11 @@ public:
 	inline operator T() const
 	{
 		return le_to_host<T>(data);
+	}
+
+	inline void operator=(const T& value)
+	{
+		data = host_to_le<T>(value);
 	}
 };
 
