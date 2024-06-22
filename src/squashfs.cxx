@@ -149,6 +149,12 @@ MetadataReader::MetadataReader(const MMAPFile& new_file,
 	: f(new_file, offset, c),
 	bufp(buf), buf_filled(0), _block_num(0)
 {
+	buf = new char[buf_size];
+}
+
+MetadataReader::~MetadataReader()
+{
+	delete[] buf;
 }
 
 void MetadataReader::poll_data()

@@ -277,10 +277,10 @@ class MetadataReader
 {
 	MetadataBlockReader f;
 
-	static constexpr size_t max_supported_file_size = 0x10000000000; // 1 TiB
-        
-	static const size_t buf_size = squashfs::inode::lreg::max_possible_inode_size(max_supported_file_size);
-	char buf[buf_size];
+	static constexpr size_t max_supported_file_size = 1ull << 40; // 1 TiB -> 1 GiB buffer (2^30)
+
+	static constexpr size_t buf_size = squashfs::inode::lreg::max_possible_inode_size(max_supported_file_size);
+	char* buf;
 	char* bufp;
 	size_t buf_filled;
 	size_t _block_num;
@@ -290,6 +290,7 @@ class MetadataReader
 public:
 	MetadataReader(const MMAPFile& new_file,
 			size_t offset, Compressor& c);
+	~MetadataReader();
 
 	template <class T>
 	const T& read();
