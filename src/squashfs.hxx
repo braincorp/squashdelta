@@ -26,6 +26,7 @@ extern "C"
 #endif
 }
 
+#include <cstdint>
 #include "util.hxx"
 
 class Compressor;
@@ -169,6 +170,10 @@ namespace squashfs
 			char* symlink_name();
 
 			size_t inode_size();
+			static constexpr size_t max_possible_inode_size(uint_fast32_t max_symlink_target_size) {
+                // Max possible symlink happens with longest possible symlink target (2^32)
+                return sizeof(symlink) + max_symlink_target_size;
+            }
 		};
 
 		struct reg : public base
@@ -200,6 +205,11 @@ namespace squashfs
 
 			uint64_t block_count(uint32_t block_size, uint16_t block_log);
 			size_t inode_size(uint32_t block_size, uint16_t block_log);
+			static constexpr size_t max_possible_inode_size(uint_fast64_t max_file_size) {
+				// Max possible length of array of block sizes happens with largest possible
+				// file (2^64) and smallest possible block size (2^12 = 4096).
+                return sizeof(lreg) + max_file_size / 4096 * sizeof(le32);
+            }
 		};
 
 		struct dir : public base
@@ -266,8 +276,10 @@ public:
 class MetadataReader
 {
 	MetadataBlockReader f;
+
+	static constexpr size_t max_supported_file_size = 0x10000000000; // 1 TiB
         
-	static const size_t buf_size = 16 * squashfs::metadata_size;
+	static const size_t buf_size = squashfs::inode::lreg::max_possible_inode_size(max_supported_file_size);
 	char buf[buf_size];
 	char* bufp;
 	size_t buf_filled;
