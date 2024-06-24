@@ -207,8 +207,9 @@ namespace squashfs
 			size_t inode_size(uint32_t block_size, uint16_t block_log);
 			static constexpr size_t max_possible_inode_size(uint_fast64_t max_file_size) {
 				// Max possible length of array of block sizes happens with largest possible
-				// file (2^64) and smallest possible block size (2^12 = 4096).
-                return sizeof(lreg) + max_file_size / 4096 * sizeof(le32);
+				// file (2^64) and smallest possible block size (2^12).
+				// max_file_size / 2^12 * sizeof(le32) == max_file_size >> 10
+                return sizeof(lreg) + (max_file_size >> 10);
             }
 		};
 
