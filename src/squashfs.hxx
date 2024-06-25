@@ -171,9 +171,9 @@ namespace squashfs
 
 			size_t inode_size();
 			static constexpr size_t max_possible_inode_size(uint_fast32_t max_symlink_target_size) {
-                // Max possible symlink happens with longest possible symlink target (2^32)
-                return sizeof(symlink) + max_symlink_target_size;
-            }
+				// Max possible symlink happens with longest possible symlink target (2^32)
+				return sizeof(symlink) + max_symlink_target_size;
+			}
 		};
 
 		struct reg : public base
@@ -209,8 +209,8 @@ namespace squashfs
 				// Max possible length of array of block sizes happens with largest possible
 				// file (2^64) and smallest possible block size (2^12).
 				// max_file_size / 2^12 * sizeof(le32) == max_file_size >> 10
-                return sizeof(lreg) + (max_file_size >> 10);
-            }
+				return sizeof(lreg) + (max_file_size >> 10);
+			}
 		};
 
 		struct dir : public base
