@@ -281,9 +281,11 @@ class MetadataReader
 	// Supporting the max possible file in squashfs (16 exbibytes) leads to an impossibly large
 	// inode that we'd have to load (16 pebibytes), so we have to pick an arbitrary limit that's
 	// more reasonable.
+	// We'll arbitrarily pick 1 TiB (2^40) as the max supported file size. This leads to a max inode
+	// size (and therefore buffer size) of 1 GiB (2^30) plus a few extra bytes.
 	// This doesn't consume physical memory (on Linux) unless that part of the buffer is actually
 	// written to. https://stackoverflow.com/questions/864416/are-some-allocators-lazy
-	static constexpr size_t max_supported_file_size = 1ull << 40; // 1 TiB -> 1 GiB buffer (2^30)
+	static constexpr size_t max_supported_file_size = 1ull << 40;
 
 	static constexpr size_t buf_size = squashfs::inode::lreg::max_possible_inode_size(max_supported_file_size);
 	char* buf;
