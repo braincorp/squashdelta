@@ -147,9 +147,10 @@ void MetadataBlockReader::read_input_block(const void** data,
 MetadataReader::MetadataReader(const MMAPFile& new_file,
 		size_t offset, Compressor& c)
 	: f(new_file, offset, c),
-	bufp(buf), buf_filled(0), _block_num(0)
+	buf_filled(0), _block_num(0)
 {
 	buf = new char[buf_size];
+	bufp = buf;
 }
 
 MetadataReader::~MetadataReader()
