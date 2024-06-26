@@ -26,6 +26,7 @@ extern "C"
 #endif
 }
 
+#include <cstdint>
 #include "util.hxx"
 
 class Compressor;
@@ -169,6 +170,10 @@ namespace squashfs
 			char* symlink_name();
 
 			size_t inode_size();
+			static constexpr size_t max_possible_inode_size(uint_fast32_t max_symlink_target_size) {
+				// Max possible symlink happens with longest possible symlink target (2^32)
+				return sizeof(symlink) + max_symlink_target_size;
+			}
 		};
 
 		struct reg : public base
@@ -198,8 +203,14 @@ namespace squashfs
 			//le32 block_list[0];
 			le32* block_list();
 
-			uint32_t block_count(uint32_t block_size, uint16_t block_log);
+			uint64_t block_count(uint32_t block_size, uint16_t block_log);
 			size_t inode_size(uint32_t block_size, uint16_t block_log);
+			static constexpr size_t max_possible_inode_size(uint_fast64_t max_file_size) {
+				// Max possible length of array of block sizes happens with largest possible
+				// file (2^64) and smallest possible block size (2^12).
+				// max_file_size / 2^12 * sizeof(le32) == max_file_size >> 10
+				return sizeof(lreg) + (max_file_size >> 10);
+			}
 		};
 
 		struct dir : public base
@@ -266,9 +277,18 @@ public:
 class MetadataReader
 {
 	MetadataBlockReader f;
-        
-	static const size_t buf_size = 16 * squashfs::metadata_size;
-	char buf[buf_size];
+
+	// Supporting the max possible file in squashfs (16 exbibytes) leads to an impossibly large
+	// inode that we'd have to load (16 pebibytes), so we have to pick an arbitrary limit that's
+	// more reasonable.
+	// We'll arbitrarily pick 1 TiB (2^40) as the max supported file size. This leads to a max inode
+	// size (and therefore buffer size) of 1 GiB (2^30) plus a few extra bytes.
+	// This doesn't consume physical memory (on Linux) unless that part of the buffer is actually
+	// written to. https://stackoverflow.com/questions/864416/are-some-allocators-lazy
+	static constexpr size_t max_supported_file_size = 1ull << 40;
+
+	static constexpr size_t buf_size = squashfs::inode::lreg::max_possible_inode_size(max_supported_file_size);
+	char* buf;
 	char* bufp;
 	size_t buf_filled;
 	size_t _block_num;
@@ -278,6 +298,7 @@ class MetadataReader
 public:
 	MetadataReader(const MMAPFile& new_file,
 			size_t offset, Compressor& c);
+	~MetadataReader();
 
 	template <class T>
 	const T& read();
